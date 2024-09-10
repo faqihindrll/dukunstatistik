@@ -481,7 +481,7 @@
         }
         
         // Data configuration with two datasets
-        const datakemiskinan = {
+        const data = {
           labels: labels,
           datasets: [
               {
@@ -493,30 +493,24 @@
                   segment: {
                     borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
                 }
-              }
-          ]
-      };
-
-      const datapengangguran = {
-        labels: labels,
-        datasets: [
-            {
+              },
+              {
                 label: 'Pengagguran',
                 data: [7.48, 10.59, 6.12, 6.89, 8.47, 9.52, 8.94, 7.33, 8.24, 8.12, 9.82, 9.97, 9.64, 8.60],
                 fill: false,
-                borderColor: 'rgb(75, 192, 192)',
+                borderColor: 'rgb(166, 163, 10)',
                 tension: 0.1,
                 segment: {
                   borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
               }
             }
-        ]
-    };
+          ]
+      };
 
       // Configuration for the line chart
       const config = {
           type: 'line',
-          data: datakemiskinan,
+          data: data,
           options: {
             plugins: {
               legend: {
@@ -567,7 +561,8 @@
           
           inputContainer.appendChild(p);
           if (selectedValue === 'kemiskinan') {
-            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Pengangguran'));
+            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => dataset.label.startsWith('Pengangguran'));
+            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => dataset.label.startsWith('Kemiskinan'));
             lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
             lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
             lineChart.data.datasets.push({
@@ -582,7 +577,7 @@
           });
           lineChart.update();
 
-            const queries = ['"Biaya Kuliah"', '"Biaya Kuliah"', '"Biaya Listrik"', '"Biaya Rumah Sakit"', '"Medical Check Up"','"Paket Internet"','"Biaya Sekolah"','"Harga Bensin"'];
+            const queries = ['"Biaya kuliah"', '"Biaya listrik"', '"Biaya rumah sakit"', '"Medical check up"','"Paket Internet"','"Biaya sekolah"','"Harga bensin"','"Jual rumah"'];
             const row = document.createElement('div');
             row.className = 'row';
 
@@ -598,7 +593,7 @@
               input.type = 'number';
               input.className = 'form-control';
               input.placeholder = query.toLowerCase();
-              input.name = 'pengangguran_query_' + query;
+              input.name = 'kemiskinan_query_' + query;
               input.min = 0;
               input.max = 100;
               input.id = `input${index}`;
@@ -609,14 +604,15 @@
             });
             inputContainer.appendChild(row);
           } else if (selectedValue === 'pengangguran') {
-            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Kemiskinan'));
+            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => dataset.label.startsWith('Pengangguran'));
+            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => dataset.label.startsWith('Kemiskinan'));
             lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
             lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
             lineChart.data.datasets.push({
               label: 'Pengangguran',
               data: [7.48, 10.59, 6.12, 6.89, 8.47, 9.52, 8.94, 7.33, 8.24, 8.12, 9.82, 9.97, 9.64, 8.60],
               fill: false,
-              borderColor: 'rgb(75, 192, 192)',
+              borderColor: 'rgb(166, 163, 10)',
               tension: 0.1,
               segment: {
                 borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
@@ -638,7 +634,7 @@
                 input.type = 'number';
                 input.className = 'form-control';
                 input.placeholder = query.toLowerCase();
-                input.name = 'kemiskinan_query_' + query;
+                input.name = 'pengangguran_query_' + query;
                 input.min = 0;
                 input.max = 100;
                 input.id = `input${index}`;
@@ -671,6 +667,8 @@
           });
       
           const predict = await response.json();
+          console.log(predict);
+
           lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
           lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Pengangguran'));
           lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
@@ -690,10 +688,10 @@
           pointHitRadius: 0 // No hover interaction
         });
 
-        const prediksiARIMAXData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, predict]; // contoh data prediksi
+        const prediksiXGBoostData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, predict['XGBoost'][0]]; // contoh data prediksi
         lineChart.data.datasets.push({
-          label: 'Prediksi ARIMAX',
-          data: prediksiARIMAXData,
+          label: 'Prediksi XGBoost',
+          data: prediksiXGBoostData,
           fill: false,
           borderDash: [5, 5], // Dashed line for prediction
           borderColor: 'rgb(191, 88, 4)',
@@ -705,8 +703,22 @@
         pointHitRadius: 0 // No hover interaction
       });
 
+      const prediksiRandomFData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, predict['Random Forest'][0]]; // contoh data prediksi
+      lineChart.data.datasets.push({
+        label: 'Prediksi Random Forest',
+        data: prediksiRandomFData,
+        fill: false,
+        borderDash: [5, 5], // Dashed line for prediction
+        borderColor: 'rgb(36, 166, 10)',
+        tension: 0.1,
+        pointRadius: function(ctx) {
+          return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+      },
+      pointHoverRadius: 0, // No hover effect
+      pointHitRadius: 0 // No hover interaction
+    });
+
         lineChart.update();
-        console.log(predict);
 
         }else if(selectedValue === 'pengangguran'){
           const queries = ['"Lowongan Kerja"'];
@@ -731,9 +743,9 @@
 
           lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
           lineChart.data.labels.push(2024);
-          const prediksiARIMAData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 8.60, 6.96]; // contoh data prediksi
+          const prediksiARIMAData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 8.60, 8.61]; // contoh data prediksi
           lineChart.data.datasets.push({
-            label: 'Prediksi ARIMA',
+            label: 'Prediksi ARCH',
             data: prediksiARIMAData,
             fill: false,
             borderDash: [5, 5], // Dashed line for prediction
@@ -746,10 +758,10 @@
           pointHitRadius: 0 // No hover interaction
         });
 
-        const prediksiARIMAXData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 8.60, predict]; // contoh data prediksi
+        const prediksiXGBoostData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, predict['XGBoost'][0]]; // contoh data prediksi
         lineChart.data.datasets.push({
-          label: 'Prediksi ARIMAX',
-          data: prediksiARIMAXData,
+          label: 'Prediksi XGBoost',
+          data: prediksiXGBoostData,
           fill: false,
           borderDash: [5, 5], // Dashed line for prediction
           borderColor: 'rgb(191, 88, 4)',
@@ -760,6 +772,21 @@
         pointHoverRadius: 0, // No hover effect
         pointHitRadius: 0 // No hover interaction
       });
+
+      const prediksiRandomFData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, predict['Random Forest'][0]]; // contoh data prediksi
+      lineChart.data.datasets.push({
+        label: 'Prediksi Random Forest',
+        data: prediksiRandomFData,
+        fill: false,
+        borderDash: [5, 5], // Dashed line for prediction
+        borderColor: 'rgb(36, 166, 10)',
+        tension: 0.1,
+        pointRadius: function(ctx) {
+          return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+      },
+      pointHoverRadius: 0, // No hover effect
+      pointHitRadius: 0 // No hover interaction
+    });
 
         lineChart.update();
         console.log(predict);
