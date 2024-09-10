@@ -230,7 +230,7 @@
         </div>
 
           <div class="d-flex justify-content-center mt-4">
-              <button type="button" class="rounded-pill btn-rounded border-primary center">Ramal Tahun Depan  
+              <button id="buttonRamal" type="button" class="rounded-pill btn-rounded border-primary center">Ramal Tahun Depan  
                   <span><i class="fas fa-arrow-right"></i></span>
               </button>
           </div>
@@ -473,102 +473,89 @@
     </script>
 
     <script>
-              // Labels for the x-axis
-              const labels = [];
-                for (let year = 2010; year <= 2024; year++) {
-                  labels.push(year);
+        // Rendering the line chart with two datasets
+
+        const labels = [];
+        for (let year = 2010; year <= 2023; year++) {
+          labels.push(year);
+        }
+        
+        // Data configuration with two datasets
+        const datakemiskinan = {
+          labels: labels,
+          datasets: [
+              {
+                  label: 'Kemiskinan',
+                  data: [13.11, 11.51, 10.75, 10.58, 9.87, 10.09, 10.10, 9.90, 7.94, 7.94, 8.14, 8.60, 7.90, 7.30],
+                  fill: false,
+                  borderColor: 'rgb(75, 192, 192)',
+                  tension: 0.1,
+                  segment: {
+                    borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
                 }
-              
-              // Data configuration with two datasets
-              const data = {
-                  labels: labels,
-                  datasets: [
-                      {
-                          label: 'Kemiskinan',
-                          data: [8.7, 8.5, 8.4, 8.3, 8.1, 7.9, 7.8, 7.6, 7.5, 7.3, 7.2, 7.1, 7.0, 6.8,null],
-                          fill: false,
-                          borderColor: 'rgb(75, 192, 192)',
-                          tension: 0.1,
-                          segment: {
-                            borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
-                        }
+              }
+          ]
+      };
+
+      const datapengangguran = {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Pengagguran',
+                data: [7.48, 10.59, 6.12, 6.89, 8.47, 9.52, 8.94, 7.33, 8.24, 8.12, 9.82, 9.97, 9.64, 8.60],
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                segment: {
+                  borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
+              }
+            }
+        ]
+    };
+
+      // Configuration for the line chart
+      const config = {
+          type: 'line',
+          data: datakemiskinan,
+          options: {
+            plugins: {
+              legend: {
+                  position: 'top', // Posisi legenda (top, bottom, left, right)
+                  labels: {
+                      color: 'rgb(0, 0, 0)', // Warna teks legenda
+                      font: {
+                          size: 14, // Ukuran font
+                          family: 'Poppins', // Gaya font
                       },
-                      // Prediction data
-                      {
-                          label: 'ARIMA Pred',
-                          data: [null, null, null, null, null, null, null, null, null, null, null, null, null, 6.8, 6.7],
-                          fill: false,
-                          borderDash: [5, 5], // Dashed line for prediction
-                          borderColor: 'rgb(124, 24, 25)',
-                          tension: 0.1,
-                          pointRadius: function(ctx) {
-                            return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
-                        },
-                        pointHoverRadius: 0, // No hover effect
-                        pointHitRadius: 0 // No hover interaction
-                      },
-                      {
-                          label: 'ML Pred',
-                          data: [null, null, null, null, null, null, null, null, null, null, null, null, null, 6.8, 5.7],
-                          fill: false,
-                          borderDash: [5, 5], // Dashed line for prediction
-                          borderColor: 'rgb(255, 159, 64)',
-                          tension: 0.1,
-                          pointRadius: function(ctx) {
-                            return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
-                        },
-                        pointHoverRadius: 0, // No hover effect
-                        pointHitRadius: 0 // No hover interaction
-                      }
-                  ]
-              };
-      
-              // Configuration for the line chart
-              const config = {
-                  type: 'line',
-                  data: data,
-                  options: {
-                    plugins: {
-                      legend: {
-                          position: 'top', // Posisi legenda (top, bottom, left, right)
-                          labels: {
-                              color: 'rgb(0, 0, 0)', // Warna teks legenda
-                              font: {
-                                  size: 14, // Ukuran font
-                                  family: 'Poppins', // Gaya font
-                              },
-                              boxWidth: 10, // Lebar kotak warna di sebelah teks
-                              boxHeight: 10, // Tinggi kotak warna
-                              padding: 10, // Padding antara item legenda
-                              usePointStyle: true, // Gunakan simbol point style untuk legenda
-                              pointStyle: 'circle', // Gaya simbol (circle, rect, triangle, etc.)
-                          }
-                      }
-                  },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false // Menonaktifkan grid pada sumbu y
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                display: false // Menonaktifkan grid pada sumbu y
-                            }
-                        }
+                      boxWidth: 10, // Lebar kotak warna di sebelah teks
+                      boxHeight: 10, // Tinggi kotak warna
+                      padding: 10, // Padding antara item legenda
+                      usePointStyle: true, // Gunakan simbol point style untuk legenda
+                      pointStyle: 'circle', // Gaya simbol (circle, rect, triangle, etc.)
+                  }
+              }
+          },
+            scales: {
+                x: {
+                    grid: {
+                        display: false // Menonaktifkan grid pada sumbu y
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: false // Menonaktifkan grid pada sumbu y
                     }
                 }
-              };
-      
-              // Rendering the line chart with two datasets
-              const lineChart = new Chart(
-                  document.getElementById('grafiks'),
-                  config
-              );
-    </script>
+            }
+        }
+      };
 
-    <script>
+      const lineChart = new Chart(
+        document.getElementById('grafiks'),
+        config
+    );
+
       function updateInputFields() {
           const selectedValue = document.getElementById('pilihramal').value;
           const inputContainer = document.getElementById('inputContainer');
@@ -579,8 +566,23 @@
           p.innerText = 'Input Query';
           
           inputContainer.appendChild(p);
-          if (selectedValue === 'pengangguran') {
-            const queries = ['"loker"', '"lowongan kerja"', '"loker tegal"', '"lowongan"', '"job di tegal"','"a"','"back"','"cek"'];
+          if (selectedValue === 'kemiskinan') {
+            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Pengangguran'));
+            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
+            lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
+            lineChart.data.datasets.push({
+              label: 'Kemiskinan',
+              data: [13.11, 11.51, 10.75, 10.58, 9.87, 10.09, 10.10, 9.90, 7.94, 7.94, 8.14, 8.60, 7.90, 7.30],
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1,
+              segment: {
+                borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
+            }
+          });
+          lineChart.update();
+
+            const queries = ['"Biaya Kuliah"', '"Biaya Kuliah"', '"Biaya Listrik"', '"Biaya Rumah Sakit"', '"Medical Check Up"','"Paket Internet"','"Biaya Sekolah"','"Harga Bensin"'];
             const row = document.createElement('div');
             row.className = 'row';
 
@@ -599,21 +601,37 @@
               input.name = 'pengangguran_query_' + query;
               input.min = 0;
               input.max = 100;
+              input.id = `input${index}`;
           
               div.appendChild(label);
               div.appendChild(input);
               row.appendChild(div);
             });
             inputContainer.appendChild(row);
-          } else if (selectedValue === 'kemiskinan') {
-            const queries = ['"biaya rumah"', '"biaya listrik"', '"biaya sekolah"', '"biaya kuliah"', '"biaya bensin"'];
+          } else if (selectedValue === 'pengangguran') {
+            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Kemiskinan'));
+            lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
+            lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
+            lineChart.data.datasets.push({
+              label: 'Pengangguran',
+              data: [7.48, 10.59, 6.12, 6.89, 8.47, 9.52, 8.94, 7.33, 8.24, 8.12, 9.82, 9.97, 9.64, 8.60],
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1,
+              segment: {
+                borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
+            }
+          });
+          lineChart.update();
+
+            const queries = ['"Lowongan Kerja"'];
             queries.forEach((query, index) => {
                 const div = document.createElement('div');
                 div.className = 'form-group col mb-2';
                 div.style.width = '100%';
 
                 const label = document.createElement('label');
-                label.innerText = 'Query ' + query.toLowerCase();
+                label.innerText = ' Input Query ' + (index + 1);
                 label.className = 'text-dark';
 
                 const input = document.createElement('input');
@@ -623,6 +641,7 @@
                 input.name = 'kemiskinan_query_' + query;
                 input.min = 0;
                 input.max = 100;
+                input.id = `input${index}`;
 
                 div.appendChild(label);
                 div.appendChild(input);
@@ -630,6 +649,122 @@
               });
           }
       }
+
+      document.getElementById('buttonRamal').addEventListener('click', async () => {
+        //ambil data input query
+        const selectedValue = document.getElementById('pilihramal').value;
+
+        if (selectedValue === 'kemiskinan') {
+          const queries = ['"Biaya Kuliah"', '"Biaya Kuliah"', '"Biaya Listrik"', '"Biaya Rumah Sakit"', '"Medical Check Up"', '"Paket Internet"', '"Biaya Sekolah"', '"Harga Bensin"'];
+          const inputValues = queries.map((query, index) => {
+            const input = document.getElementById(`input${index}`);
+            return input ? input.value : null;
+          });
+
+          // Kirim data sebagai JSON
+          const response = await fetch('/predictkemiskinan', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ values: inputValues })
+          });
+      
+          const predict = await response.json();
+          lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
+          lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Pengangguran'));
+          lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
+          lineChart.data.labels.push(2024);
+          const prediksiARIMAData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, 6.96]; // contoh data prediksi
+          lineChart.data.datasets.push({
+            label: 'Prediksi ARIMA',
+            data: prediksiARIMAData,
+            fill: false,
+            borderDash: [5, 5], // Dashed line for prediction
+            borderColor: 'rgb(124, 24, 25)',
+            tension: 0.1,
+            pointRadius: function(ctx) {
+              return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+          },
+          pointHoverRadius: 0, // No hover effect
+          pointHitRadius: 0 // No hover interaction
+        });
+
+        const prediksiARIMAXData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, predict]; // contoh data prediksi
+        lineChart.data.datasets.push({
+          label: 'Prediksi ARIMAX',
+          data: prediksiARIMAXData,
+          fill: false,
+          borderDash: [5, 5], // Dashed line for prediction
+          borderColor: 'rgb(191, 88, 4)',
+          tension: 0.1,
+          pointRadius: function(ctx) {
+            return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+        },
+        pointHoverRadius: 0, // No hover effect
+        pointHitRadius: 0 // No hover interaction
+      });
+
+        lineChart.update();
+        console.log(predict);
+
+        }else if(selectedValue === 'pengangguran'){
+          const queries = ['"Lowongan Kerja"'];
+          const inputValues = queries.map((query, index) => {
+            const input = document.getElementById(`input${index}`);
+            return input ? input.value : null;
+          });
+        
+          // Kirim data sebagai JSON
+          const response = await fetch('/predictkemiskinan', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ values: inputValues })
+          });
+
+          const predict = await response.json();
+          
+          lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
+          lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Kemiskinan'));
+
+          lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
+          lineChart.data.labels.push(2024);
+          const prediksiARIMAData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 8.60, 6.96]; // contoh data prediksi
+          lineChart.data.datasets.push({
+            label: 'Prediksi ARIMA',
+            data: prediksiARIMAData,
+            fill: false,
+            borderDash: [5, 5], // Dashed line for prediction
+            borderColor: 'rgb(124, 24, 25)',
+            tension: 0.1,
+            pointRadius: function(ctx) {
+              return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+          },
+          pointHoverRadius: 0, // No hover effect
+          pointHitRadius: 0 // No hover interaction
+        });
+
+        const prediksiARIMAXData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 8.60, predict]; // contoh data prediksi
+        lineChart.data.datasets.push({
+          label: 'Prediksi ARIMAX',
+          data: prediksiARIMAXData,
+          fill: false,
+          borderDash: [5, 5], // Dashed line for prediction
+          borderColor: 'rgb(191, 88, 4)',
+          tension: 0.1,
+          pointRadius: function(ctx) {
+            return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+        },
+        pointHoverRadius: 0, // No hover effect
+        pointHitRadius: 0 // No hover interaction
+      });
+
+        lineChart.update();
+        console.log(predict);
+        }
+      });
   </script>
     <script src="assets/js/bootstrap.bundle.min.js"></script>
 
