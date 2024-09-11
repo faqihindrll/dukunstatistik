@@ -11,9 +11,20 @@
     <script src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      .number-transition {
+          transition: all 1s ease;
+      }
+
+      .number {
+          display: inline-block;
+          font-size: 1.25rem;
+          font-weight: bold;
+      }
+    </style>
     <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
     <!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
 </head>
 <body>
 <!-- ////////////////////////////////////////////////////////////////////////////////////////
@@ -206,34 +217,70 @@
     <div class="container text-left text-white">
       <form id="ramalanForm">
 
-          <div class="mb-3">
+          <div class="mb-3 row">
+            <div class="col-md-9">
               <label for="pilihramal">Pilih Ramalan</label>
               <select class="form-select form-select-lg fw-bold fs-5" id="pilihramal" onchange="updateInputFields()">
                   <option value="" hidden selected>Pilih Ramalan</option>
-                  <option value="pengangguran">Pengangguran</option>
-                  <option value="kemiskinan">Kemiskinan</option>
+                  <option value="pengangguran">Tingkat Pengangguran Terbuka</option>
+                  <option value="kemiskinan">Persentase Penduduk Miskin (P0)</option>
               </select>
+            </div>
+            <div class="d-flex col-md-3 justify-content-center mt-4">
+                <button id="buttonRamal" type="button" class="rounded-pill btn-rounded border-primary center">Ramal Data
+                    <span><i class="fas fa-arrow-right"></i></span>
+                </button>
+            </div>
           </div>
 
           <div class="row g-4">
             <div class="col-md-6 d-flex">
                 <div id="inputContainer" class="d-block bg-light rounded p-4 flex-grow-1">
-                    <p class="fw-bold text-dark fs-5 text-center">Input Query</p>
+                    <p class="fw-bold text-dark fs-5 text-center">Input Query dari Google Trends Kabupaten Tegal</p>
                 </div>
             </div>
             <div class="col-md-6 d-flex">
                 <div class="d-block bg-light rounded p-4 flex-grow-1">
-                    <p class="fw-bold text-dark fs-5 text-center">Visualisasi</p>
-                    <canvas class="w-100" id="grafiks"></canvas>
+                    <p class="fw-bold text-dark fs-5 text-center" id="angkapredisksi">Prediksi Tahun 2024</p>
+                    <p class="text-dark fs-5 text-left" id="labelaktual">Nilai Aktual</p>
+                    <div class="d-flex col">
+                      <p class="fw-bold text-dark fs-4 text-left" id="aktual">0</p>
+                      <p class="fw-bold text-dark fs-4 text-left" id="persenaktual">%</p>
+                    </div>  
+
+                    <p class="text-dark fs-5 text-left" id="labelkonvensional">Metode Konvensional</p>
+                    <p class="fw-bold text-dark fs-6 text-left">ARIMA : </p>
+
+                    <div class="d-flex col">
+                      <p class="fw-bold text-dark fs-4 text-left" id="arima">0</p>
+                      <p class="fw-bold text-dark fs-4 text-left">%</p>
+                    </div>
+
+                    <p class="text-dark fs-5 text-left" id="labelml">Machine Learning</p>
+                    <p class="fw-bold text-dark fs-6 text-left">XGBoost : </p>
+                    <div class="d-flex col">
+                      <p class="fw-bold text-dark fs-4 text-left" id="xgboost">0</p>
+                      <p class="fw-bold text-dark fs-4 text-left">%</p>
+                    </div>
+                    <p class="fw-bold text-dark fs-6 text-left">Random Forest : </p>
+                    <div class="d-flex col">
+                      <p class="fw-bold text-dark fs-4 text-left" id="randomforest">0</p>
+                      <p class="fw-bold text-dark fs-4 text-left">%</p>
+                    </div>
+
+
                 </div>
             </div>
         </div>
 
-          <div class="d-flex justify-content-center mt-4">
-              <button id="buttonRamal" type="button" class="rounded-pill btn-rounded border-primary center">Ramal Tahun Depan  
-                  <span><i class="fas fa-arrow-right"></i></span>
-              </button>
+        <div class="row g-1 mt-4">
+          <div class="bg-light rounded p-4">
+            <p class="fw-bold text-dark fs-5 text-center">Visualisasi</p>
+            <canvas class="w-100" id="grafiks"></canvas>
           </div>
+      </div>
+
+
   
       </form>
   </div>
@@ -473,8 +520,27 @@
     </script>
 
     <script>
-        // Rendering the line chart with two datasets
+      //Animasi Angka
+      function animateNumber(element, start, end, duration) {
+        const step = 0.01;
+        const steps = Math.ceil((end - start) / step);
+        const stepDuration = duration / steps;
+        let current = start;
 
+        const updateNumber = () => {
+            if (current < end) {
+                current = Math.min(current + step, end); // Ensure we do not exceed the end value
+                element.textContent = current.toFixed(2); // Update with 2 decimal places
+                setTimeout(updateNumber, stepDuration);
+            } else {
+                element.textContent = end.toFixed(2); // Ensure the final value is accurate
+            }
+        };
+
+        updateNumber();
+      }
+
+        // Rendering the line chart with two datasets
         const labels = [];
         for (let year = 2010; year <= 2023; year++) {
           labels.push(year);
@@ -489,6 +555,8 @@
                   data: [13.11, 11.51, 10.75, 10.58, 9.87, 10.09, 10.10, 9.90, 7.94, 7.94, 8.14, 8.60, 7.90, 7.30],
                   fill: false,
                   borderColor: 'rgb(75, 192, 192)',
+                  borderWidth: 4, // Ketebalan garis
+                  pointRadius: 6, // Radius titik
                   tension: 0.1,
                   segment: {
                     borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
@@ -499,6 +567,8 @@
                 data: [7.48, 10.59, 6.12, 6.89, 8.47, 9.52, 8.94, 7.33, 8.24, 8.12, 9.82, 9.97, 9.64, 8.60],
                 fill: false,
                 borderColor: 'rgb(166, 163, 10)',
+                borderWidth: 4, // Ketebalan garis
+                pointRadius: 6, // Radius titik
                 tension: 0.1,
                 segment: {
                   borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
@@ -548,19 +618,25 @@
       const lineChart = new Chart(
         document.getElementById('grafiks'),
         config
-    );
+      );
 
       function updateInputFields() {
           const selectedValue = document.getElementById('pilihramal').value;
           const inputContainer = document.getElementById('inputContainer');
+          document.getElementById('aktual').innerText = 0;
+          document.getElementById('arima').innerText = 0;
+          document.getElementById('xgboost').innerText = 0;
+          document.getElementById('randomforest').innerText = 0;
+
           inputContainer.innerHTML = ''; // Clear previous inputs
           //buatkan p Input Query bold
           const p = document.createElement('p');
           p.className = 'fw-bold text-dark fs-5 text-center';
-          p.innerText = 'Input Query';
+          p.innerText = 'Input Query dari Google Trends Kabupaten Tegal';
           
           inputContainer.appendChild(p);
           if (selectedValue === 'kemiskinan') {
+            document.getElementById('angkapredisksi').innerText = 'Prediksi Presentase Penduduk Miskin (P0) Kabupaten Tegal Tahun 2024';
             lineChart.data.datasets = lineChart.data.datasets.filter(dataset => dataset.label.startsWith('Pengangguran'));
             lineChart.data.datasets = lineChart.data.datasets.filter(dataset => dataset.label.startsWith('Kemiskinan'));
             lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
@@ -569,6 +645,8 @@
               label: 'Kemiskinan',
               data: [13.11, 11.51, 10.75, 10.58, 9.87, 10.09, 10.10, 9.90, 7.94, 7.94, 8.14, 8.60, 7.90, 7.30],
               fill: false,
+              borderWidth: 4, // Ketebalan garis
+              pointRadius: 6, // Radius titik
               borderColor: 'rgb(75, 192, 192)',
               tension: 0.1,
               segment: {
@@ -586,13 +664,13 @@
               div.className = 'col-md-6 mb-3'; // Mengatur lebar kolom menjadi setengah layar pada medium screen ke atas
           
               const label = document.createElement('label');
-              label.innerText = 'Input Query ' + (index + 1);
+              label.innerText = 'Input Query ' + query;
               label.className = 'text-dark';
           
               const input = document.createElement('input');
               input.type = 'number';
               input.className = 'form-control';
-              input.placeholder = query.toLowerCase();
+              input.placeholder = "0-100";
               input.name = 'kemiskinan_query_' + query;
               input.min = 0;
               input.max = 100;
@@ -604,6 +682,7 @@
             });
             inputContainer.appendChild(row);
           } else if (selectedValue === 'pengangguran') {
+            document.getElementById('angkapredisksi').innerText = 'Prediksi Tingkat Pengangguran Terbuka Kabupaten Tegal Tahun 2024';
             lineChart.data.datasets = lineChart.data.datasets.filter(dataset => dataset.label.startsWith('Pengangguran'));
             lineChart.data.datasets = lineChart.data.datasets.filter(dataset => dataset.label.startsWith('Kemiskinan'));
             lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
@@ -613,6 +692,8 @@
               data: [7.48, 10.59, 6.12, 6.89, 8.47, 9.52, 8.94, 7.33, 8.24, 8.12, 9.82, 9.97, 9.64, 8.60],
               fill: false,
               borderColor: 'rgb(166, 163, 10)',
+              borderWidth: 4, // Ketebalan garis
+              pointRadius: 6, // Radius titik
               tension: 0.1,
               segment: {
                 borderColor: ctx => ctx.p0DataIndex === 13 ? 'rgb(54, 162, 235)' : undefined // Change color at prediction point
@@ -627,13 +708,13 @@
                 div.style.width = '100%';
 
                 const label = document.createElement('label');
-                label.innerText = ' Input Query ' + (index + 1);
+                label.innerText = ' Input Query ' + query;
                 label.className = 'text-dark';
 
                 const input = document.createElement('input');
                 input.type = 'number';
                 input.className = 'form-control';
-                input.placeholder = query.toLowerCase();
+                input.placeholder = "0-100";
                 input.name = 'pengangguran_query_' + query;
                 input.min = 0;
                 input.max = 100;
@@ -648,9 +729,11 @@
 
       document.getElementById('buttonRamal').addEventListener('click', async () => {
         //ambil data input query
+        document.getElementById('inputContainer').scrollIntoView({ behavior: 'smooth' });
         const selectedValue = document.getElementById('pilihramal').value;
 
         if (selectedValue === 'kemiskinan') {
+          document.getElementById('persenaktual').innerText = "%";
           const queries = ['"Biaya Kuliah"', '"Biaya Kuliah"', '"Biaya Listrik"', '"Biaya Rumah Sakit"', '"Medical Check Up"', '"Paket Internet"', '"Biaya Sekolah"', '"Harga Bensin"'];
           const inputValues = queries.map((query, index) => {
             const input = document.getElementById(`input${index}`);
@@ -669,6 +752,24 @@
           const predict = await response.json();
           console.log(predict);
 
+          //ANGKA PREDIKSI
+          const predictions = {
+            'aktual': 6.81,
+            'arima': 6.96,
+            'xgboost': predict['XGBoost'][0],
+            'randomforest': predict['Random Forest'][0]
+          };
+          
+          for (const [id, endValue] of Object.entries(predictions)) {
+            const element = document.getElementById(id);
+            if (element) {
+                animateNumber(element, 0, endValue, 10);
+            }
+          }
+
+          
+
+          //VISUALISASI PREDIKSI
           lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
           lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Pengangguran'));
           lineChart.data.labels = lineChart.data.labels.filter(label => label !== 2024);
@@ -680,9 +781,11 @@
             fill: false,
             borderDash: [5, 5], // Dashed line for prediction
             borderColor: 'rgb(124, 24, 25)',
+            borderWidth: 4, // Ketebalan garis
+            pointRadius: 6, // Radius titik
             tension: 0.1,
             pointRadius: function(ctx) {
-              return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+              return ctx.dataIndex === 14 ? 6 : 0; // Disable hover on 2023 data point (index 13)
           },
           pointHoverRadius: 0, // No hover effect
           pointHitRadius: 0 // No hover interaction
@@ -695,9 +798,11 @@
           fill: false,
           borderDash: [5, 5], // Dashed line for prediction
           borderColor: 'rgb(191, 88, 4)',
+          borderWidth: 4, // Ketebalan garis
+          pointRadius: 6, // Radius titik
           tension: 0.1,
           pointRadius: function(ctx) {
-            return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+            return ctx.dataIndex === 14 ? 6 : 0; // Disable hover on 2023 data point (index 13)
         },
         pointHoverRadius: 0, // No hover effect
         pointHitRadius: 0 // No hover interaction
@@ -710,9 +815,10 @@
         fill: false,
         borderDash: [5, 5], // Dashed line for prediction
         borderColor: 'rgb(36, 166, 10)',
+        borderWidth: 4, // Ketebalan garis
         tension: 0.1,
         pointRadius: function(ctx) {
-          return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+          return ctx.dataIndex === 14 ? 6 : 0; // Disable hover on 2023 data point (index 13)
       },
       pointHoverRadius: 0, // No hover effect
       pointHitRadius: 0 // No hover interaction
@@ -728,7 +834,7 @@
           });
         
           // Kirim data sebagai JSON
-          const response = await fetch('/predictkemiskinan', {
+          const response = await fetch('/predictpengangguran', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -738,6 +844,24 @@
 
           const predict = await response.json();
           
+                    //ANGKA PREDIKSI
+                    const predictions = {
+                      'arima': 8.61,
+                      'xgboost': predict['XGBoost'][0],
+                      'randomforest': predict['Random Forest'][0]
+                    };
+                    
+                    for (const [id, endValue] of Object.entries(predictions)) {
+                      const element = document.getElementById(id);
+                      if (element) {
+                          animateNumber(element, 0, endValue, 10);
+                      }
+                    }
+
+                    document.getElementById('aktual').innerText = "Data belum tersedia";
+                    document.getElementById('persenaktual').innerText = "";
+                    //VISUALISASI PREDIKSI
+
           lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Prediksi'));
           lineChart.data.datasets = lineChart.data.datasets.filter(dataset => !dataset.label.startsWith('Kemiskinan'));
 
@@ -750,46 +874,51 @@
             fill: false,
             borderDash: [5, 5], // Dashed line for prediction
             borderColor: 'rgb(124, 24, 25)',
+            borderWidth: 4, // Ketebalan garis
+            pointRadius: 6, // Radius titik
             tension: 0.1,
             pointRadius: function(ctx) {
-              return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+              return ctx.dataIndex === 14 ? 6 : 0; // Disable hover on 2023 data point (index 13)
           },
           pointHoverRadius: 0, // No hover effect
           pointHitRadius: 0 // No hover interaction
         });
 
-        const prediksiXGBoostData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, predict['XGBoost'][0]]; // contoh data prediksi
+        const prediksiXGBoostData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 8.60, predict['XGBoost'][0]]; // contoh data prediksi
         lineChart.data.datasets.push({
           label: 'Prediksi XGBoost',
           data: prediksiXGBoostData,
           fill: false,
           borderDash: [5, 5], // Dashed line for prediction
           borderColor: 'rgb(191, 88, 4)',
+          borderWidth: 4, // Ketebalan garis
+          pointRadius: 6, // Radius titik
           tension: 0.1,
           pointRadius: function(ctx) {
-            return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+            return ctx.dataIndex === 14 ? 6 : 0; // Disable hover on 2023 data point (index 13)
         },
         pointHoverRadius: 0, // No hover effect
         pointHitRadius: 0 // No hover interaction
       });
 
-      const prediksiRandomFData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 7.30, predict['Random Forest'][0]]; // contoh data prediksi
+      const prediksiRandomFData = [null, null, null, null, null, null, null, null, null, null, null, null, null, 8.60, predict['Random Forest'][0]]; // contoh data prediksi
       lineChart.data.datasets.push({
         label: 'Prediksi Random Forest',
         data: prediksiRandomFData,
         fill: false,
         borderDash: [5, 5], // Dashed line for prediction
+        borderWidth: 4, // Ketebalan garis
+        pointRadius: 6, // Radius titik
         borderColor: 'rgb(36, 166, 10)',
         tension: 0.1,
         pointRadius: function(ctx) {
-          return ctx.dataIndex === 14 ? 3 : 0; // Disable hover on 2023 data point (index 13)
+          return ctx.dataIndex === 14 ? 6 : 0; // Disable hover on 2023 data point (index 13)
       },
       pointHoverRadius: 0, // No hover effect
       pointHitRadius: 0 // No hover interaction
     });
 
         lineChart.update();
-        console.log(predict);
         }
       });
   </script>
